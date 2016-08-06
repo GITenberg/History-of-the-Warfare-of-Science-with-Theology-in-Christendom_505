@@ -1,0 +1,61 @@
+sudo: required
+dist: trusty
+language: ruby
+
+before_install:
+before_install:
+- gem install asciidoctor -v 1.5.2
+- gem install tilt
+- sudo pip install git+https://github.com/gitenberg-dev/gitberg
+- sudo pip install pillow
+- sudo pip install cssutils
+- sudo pip install docutils
+- sudo pip install roman
+- sudo pip install git+https://github.com/gitenberg-dev/pg-epubmaker
+script:
+- VERSION=`ruby -e "require 'yaml'; meta = YAML.load_file('metadata.yaml'); puts meta['_version'];"`
+- git clone https://github.com/gitenberg-dev/asciidoctor-htmlbook.git
+- sudo pip install -r asciidoctor-htmlbook/gitberg-machine/requirements.txt
+
+- /usr/bin/python -c "from gitenberg import travis; travis.build_epub()"
+- ebook-convert book.epub book.mobi
+- xvfb-run ebook-convert book.epub book.pdf
+branches:
+  only:
+  - master
+notifications:
+  webhooks:
+    urls:
+      - https://unglue.it/api/travisci/webhook
+    on_success: always
+    on_failure: never
+    on_start: never
+deploy:
+  skip_cleanup: true
+  provider: releases
+  api_key:
+    secure: LfYqqxiG7ccy3lnwEO5chpgnQYzuQhPIHrPg4+4T3nP6kv6zDSFw86VdYisN6bXCpLSak4idjMoCFcmFzGS8AOraRpgDuuURJkrfi4m28gG4amNhD/nTx1K5wR8W3Pzz4LaVW9ZjUZVMV3dtPevGLOiApO0ZL1PSFlESoZHdu7YbvjtYb4y+7ybT7UUI8lRoNKt7JOJakpPkUT1hjRC3JwNk/iv6+/ILG+GxH9cDb+8cdbR/W0pYRWvByNKWU4LOmxp78PvViWPkDZB8ViXLhz+sZfAsY3JeY+JPoNzqIit5GGXYignb5Vhvib8E4YAm54LcOrXfyuPa6sJqaKBHcvxq7PEKpTTeGD5jcTFCwTK9HFoiLQ/y0ix46NqEmNB0+szWYqp60hmXIrt1eZeBdeYKWnUc/Bh8I3DmxGlNRlM3HBdkR3Yofdv2Ejy71l5bV0W751FbC4FPHqh9bY/ErHUjFgvpXY8G4RL9rE98SFuGIv1/F4YlU8/dz0/hiz7aaFrUREaxNPQUZQbaDZz4EQYjG4Kk/2SnBmhr+Vn1g/wKKRAOrQswvj/A0CbNpy4QgVnYTTWpkRzN/aj0LlnxDqEXZU8idYKiXIrNRWse2NSeTIOJjJoq0k0DVcPR6VNJIUtq+1sjtTyJXQqdLLWC/nQmEDzDTHXfRyJ36goMsVE=
+  file:
+    - book.epub
+    - book.mobi
+    - book.pdf
+  "on":
+    repo: GITenberg/History-of-the-Warfare-of-Science-with-Theology-in-Christendom_505
+addons:
+  apt:
+    packages:
+    - xsltproc
+    - xvfb
+    - calibre
+    - python-pip
+    - git
+    - python-dev
+    - libjpeg-dev
+    - libpng-dev
+    - libfreetype6
+    - libfreetype6-dev
+    - zlib1g-dev
+    - python-lxml
+    - libxml2-dev
+    - libxslt1-dev
+    - tidy
